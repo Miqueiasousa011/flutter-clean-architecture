@@ -27,29 +27,36 @@ void main() {
     );
   });
 
-  test("Should call HttpClient with correct URL, method and body ", () async {
-    final body = {"email": params.email, "password": params.password};
+  When mockRequest() => when(() => httpClient.request(
+      url: any(named: 'url'),
+      method: any(named: 'method'),
+      body: any(named: 'body')));
 
-    when(() =>
-        httpClient.request(
-            url: any(named: 'url'),
-            method: any(named: 'method'),
-            body: any(named: 'body'))).thenAnswer((_) async => {
+  void mockHttpData({Map? json}) {
+    final body = json ??
+        {
           'accessToken': Faker().guid.guid(),
           'name': Faker().person.name(),
-        });
+        };
+    mockRequest().thenAnswer((_) async => body);
+  }
+
+  void mockHttpError(HttpError error) => mockRequest().thenThrow(error);
+
+  test("Should call HttpClient with correct URL, method and body ", () async {
+    mockHttpData();
 
     await sut.auth(params);
 
-    verify(() => httpClient.request(url: url, method: 'post', body: body));
+    verify(() => httpClient.request(
+          url: url,
+          method: 'post',
+          body: {"email": params.email, "password": params.password},
+        ));
   });
 
   test("Should throw UnexpectedError if HttpClient returns 400", () async {
-    when(() => httpClient.request(
-          url: any(named: "url"),
-          method: any(named: "method"),
-          body: any(named: 'body'),
-        )).thenThrow(HttpError.badRequest);
+    mockHttpError(HttpError.badRequest);
 
     final future = sut.auth(params);
 
@@ -57,10 +64,7 @@ void main() {
   });
 
   test('Should throw UnexpectedError if HttpClient returns 401', () async {
-    when(() => httpClient.request(
-        url: any(named: 'url'),
-        method: any(named: 'method'),
-        body: any(named: 'body'))).thenThrow(HttpError.unauthorized);
+    mockHttpError(HttpError.unauthorized);
 
     final future = sut.auth(params);
 
@@ -68,10 +72,7 @@ void main() {
   });
 
   test('Should throw UnexpectedError if HttpClient returns 400', () async {
-    when(() => httpClient.request(
-        url: any(named: 'url'),
-        method: any(named: 'method'),
-        body: any(named: 'body'))).thenThrow(HttpError.notFound);
+    mockHttpError(HttpError.notFound);
 
     final future = sut.auth(params);
 
@@ -79,10 +80,7 @@ void main() {
   });
 
   test('Should throw UnexpectedError if HttpClient retuns 500', () async {
-    when(() => httpClient.request(
-        url: any(named: 'url'),
-        method: any(named: 'method'),
-        body: any(named: 'body'))).thenThrow(HttpError.serverError);
+    mockHttpError(HttpError.serverError);
 
     final future = sut.auth(params);
 
@@ -95,10 +93,7 @@ void main() {
       'name': Faker().person.name()
     };
 
-    when(() => httpClient.request(
-        url: url,
-        method: 'post',
-        body: any(named: 'body'))).thenAnswer((_) async => account);
+    mockHttpData(json: account);
 
     final response = await sut.auth(params);
 
@@ -113,10 +108,7 @@ void main() {
       'any_name': Faker().person.name()
     };
 
-    when(() => httpClient.request(
-        url: url,
-        method: 'post',
-        body: any(named: 'body'))).thenAnswer((_) async => accountError);
+    mockHttpData(json: accountError);
 
     final future = sut.auth(params);
 
