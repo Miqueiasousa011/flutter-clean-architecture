@@ -15,6 +15,7 @@ class RemoteAuthentication {
     try {
       await httpClient.request(url: url, method: 'post', body: body);
     } on HttpError catch (error) {
+      if (error == HttpError.unauthorized) throw DomainError.invalidCredentials;
       throw DomainError.unexpected;
     }
   }
