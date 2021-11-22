@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:faker/faker.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -93,6 +94,12 @@ void main() {
       client.mockPost(404);
       final future = sut.request(url: url, method: 'post');
       expect(future, throwsA(HttpError.notFound));
+    });
+
+    test('Should throws ForbiddenError if HttpAdapter returns 403', () {
+      client.mockPost(403);
+      final future = sut.request(url: url, method: 'post');
+      expect(future, throwsA(HttpError.forbidden));
     });
   });
 }
