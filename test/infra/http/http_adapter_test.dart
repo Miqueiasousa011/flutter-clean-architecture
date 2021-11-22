@@ -83,6 +83,12 @@ void main() {
       expect(future, throwsA(HttpError.badRequest));
     });
 
+    test('Should throw Unauthorized if HttpAdapter returns 400', () async {
+      client.mockPost(401);
+      final future = sut.request(url: url, method: 'post');
+      expect(future, throwsA(HttpError.unauthorized));
+    });
+
     test('Should throw NotFound if HttpAdapter returns 400', () async {
       client.mockPost(404);
       final future = sut.request(url: url, method: 'post');
