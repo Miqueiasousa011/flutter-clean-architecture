@@ -2,33 +2,41 @@ import 'dart:convert';
 
 import 'package:faker/faker.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fordev/data/http/http_error.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:http/http.dart';
 
 import 'package:fordev/infra/http/http.dart';
 
-class ClientSpy extends Mock implements Client {}
+class ClientSpy extends Mock implements Client {
+  ClientSpy() {
+    mockPost(200);
+  }
+
+  When mockPostCall() => when(() => this
+      .post(any(), body: any(named: 'body'), headers: any(named: 'headers')));
+  void mockPost(int statusCode, {String body = '{"any_key":"any_value"}'}) =>
+      mockPostCall().thenAnswer((_) async => Response(body, statusCode));
+}
 
 void main() {
   late HttpAdapter sut;
   late ClientSpy client;
   late String url;
 
-  When mockRequest() => when(() => client.post(Uri.parse(url),
-      headers: any(named: 'headers'), body: any(named: 'body')));
-
-  void mockResponse(String response, int statusCod) =>
-      mockRequest().thenAnswer((_) async => Response(response, 200));
-
-  setUp(() {
-    client = ClientSpy();
-    sut = HttpAdapter(client);
-    url = Faker().internet.httpUrl();
+  setUpAll(() {
+    url = faker.internet.httpUrl();
+    registerFallbackValue(Uri.parse(url));
   });
+
   group('post', () {
     setUp(() {
-      mockResponse('', 200);
+      client = ClientSpy();
+      sut = HttpAdapter(client);
+      url = Faker().internet.httpUrl();
+      client.mockPost(200);
     });
+
     test("Should call post with correct values", () async {
       final headers = {
         'content-type': 'application/json',
@@ -52,21 +60,27 @@ void main() {
 
     test('Should return data if post returns 200', () async {
       final body = {'any': 'any'};
-      mockResponse(jsonEncode(body), 200);
+      client.mockPost(200, body: jsonEncode(body));
       final response = await sut.request(url: url, method: 'post');
       expect(response, equals(body));
     });
 
     test('Should return null if post returns 200 without data', () async {
-      mockResponse('', 200);
+      client.mockPost(200, body: '');
       final response = await sut.request(url: url, method: 'post');
       expect(response, equals(null));
     });
 
     test('Should return null if post returns 204', () async {
-      mockResponse('', 204);
+      client.mockPost(204);
       final response = await sut.request(url: url, method: 'post');
       expect(response, equals(null));
+    });
+
+    test('Should throw Badrequest if HttpAdapter returns 400', () async {
+      client.mockPost(400);
+      final future = sut.request(url: url, method: 'post');
+      expect(future, throwsA(HttpError.badRequest));
     });
   });
 }
