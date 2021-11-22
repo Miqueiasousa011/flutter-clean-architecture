@@ -11,7 +11,7 @@ class HttpAdapter {
 
   HttpAdapter(this._client);
 
-  Future<Map> request({
+  Future<Map?> request({
     required String url,
     required String method,
     Map? body,
@@ -21,7 +21,7 @@ class HttpAdapter {
 
     final response = await _client.post(uri, headers: _headers, body: jsonBody);
 
-    return jsonDecode(response.body);
+    return response.body.isEmpty ? null : jsonDecode(response.body);
   }
 
   Map<String, String> get _headers =>
@@ -75,6 +75,15 @@ void main() {
       final response = await sut.request(url: url, method: 'post');
 
       expect(response, body);
+    });
+
+    test('Should return null if post returns 200 without data', () async {
+      when(() => client.post(Uri.parse(url), headers: any(named: 'headers')))
+          .thenAnswer((_) async => Response('', 200));
+
+      final response = await sut.request(url: url, method: 'post');
+
+      expect(response, null);
     });
   });
 }

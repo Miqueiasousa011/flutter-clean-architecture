@@ -20,7 +20,7 @@ class RemoteAuthentication implements Authentication {
         method: 'post',
         body: body,
       );
-      return RemoteAccountModel.fromJson(response).toEntity();
+      return RemoteAccountModel.fromJson(response!).toEntity();
     } on HttpError catch (error) {
       if (error == HttpError.unauthorized) throw DomainError.invalidCredentials;
       throw DomainError.unexpected;
