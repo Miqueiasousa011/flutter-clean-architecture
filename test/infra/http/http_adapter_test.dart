@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:faker/faker.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,7 +18,7 @@ class ClientSpy extends Mock implements Client {
   void mockPost(int statusCode, {String body = '{"any_key":"any_value"}'}) =>
       _mockPostCall().thenAnswer((_) async => Response(body, statusCode));
 
-  void mockPostError(HttpError error) => _mockPostCall().thenThrow(error);
+  void mockPostError() => _mockPostCall().thenThrow(Exception());
 }
 
 void main() {
@@ -43,6 +42,12 @@ void main() {
     test('Should serverError if invalid method is provider', () {
       final future = sut.request(url: url, method: 'invalid');
 
+      expect(future, throwsA(HttpError.serverError));
+    });
+
+    test('Should throws serverError if post throw exception', () {
+      client.mockPostError();
+      final future = sut.request(url: url, method: 'post');
       expect(future, throwsA(HttpError.serverError));
     });
   });
