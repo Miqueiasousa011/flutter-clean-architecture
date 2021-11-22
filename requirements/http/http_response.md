@@ -5,6 +5,7 @@
 2. Passar nos headers o content type JSON
 3. ok - 200 e resposta com dados
 4. No content - 204 e resposta sem dados
+5. body válido (null ou not null)
 
 > ## Erros
 1. Bad request - 400
