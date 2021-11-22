@@ -77,10 +77,16 @@ void main() {
       expect(response, equals(null));
     });
 
-    test('Should throw Badrequest if HttpAdapter returns 400', () async {
+    test('Should throw BadRequest if HttpAdapter returns 400', () async {
       client.mockPost(400);
       final future = sut.request(url: url, method: 'post');
       expect(future, throwsA(HttpError.badRequest));
+    });
+
+    test('Should throw NotFound if HttpAdapter returns 400', () async {
+      client.mockPost(404);
+      final future = sut.request(url: url, method: 'post');
+      expect(future, throwsA(HttpError.notFound));
     });
   });
 }
