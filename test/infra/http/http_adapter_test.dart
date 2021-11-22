@@ -101,5 +101,11 @@ void main() {
       final future = sut.request(url: url, method: 'post');
       expect(future, throwsA(HttpError.forbidden));
     });
+
+    test('Should throws ServerErrorError if HttpAdapter returns 500', () {
+      client.mockPost(500);
+      final future = sut.request(url: url, method: 'post');
+      expect(future, throwsA(HttpError.serverError));
+    });
   });
 }

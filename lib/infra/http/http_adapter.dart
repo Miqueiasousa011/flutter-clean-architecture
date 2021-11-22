@@ -39,6 +39,8 @@ class HttpAdapter implements HttpClient {
       throw HttpError.forbidden;
     } else if (response.statusCode == 404) {
       throw HttpError.notFound;
+    } else if (response.statusCode == 500) {
+      throw HttpError.serverError;
     }
   }
 }
