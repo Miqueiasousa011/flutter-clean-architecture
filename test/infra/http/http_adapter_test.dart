@@ -14,10 +14,12 @@ class ClientSpy extends Mock implements Client {
     mockPost(200);
   }
 
-  When mockPostCall() => when(() => this
+  When _mockPostCall() => when(() => this
       .post(any(), body: any(named: 'body'), headers: any(named: 'headers')));
   void mockPost(int statusCode, {String body = '{"any_key":"any_value"}'}) =>
-      mockPostCall().thenAnswer((_) async => Response(body, statusCode));
+      _mockPostCall().thenAnswer((_) async => Response(body, statusCode));
+
+  void mockPostError(HttpError error) => _mockPostCall().thenThrow(error);
 }
 
 void main() {
@@ -30,14 +32,22 @@ void main() {
     registerFallbackValue(Uri.parse(url));
   });
 
-  group('post', () {
-    setUp(() {
-      client = ClientSpy();
-      sut = HttpAdapter(client);
-      url = Faker().internet.httpUrl();
-      client.mockPost(200);
-    });
+  setUp(() {
+    client = ClientSpy();
+    sut = HttpAdapter(client);
+    url = Faker().internet.httpUrl();
+    client.mockPost(200);
+  });
 
+  group('shared', () {
+    test('Should serverError if invalid method is provider', () {
+      final future = sut.request(url: url, method: 'invalid');
+
+      expect(future, throwsA(HttpError.serverError));
+    });
+  });
+
+  group('post', () {
     test("Should call post with correct values", () async {
       final headers = {
         'content-type': 'application/json',
@@ -84,22 +94,22 @@ void main() {
       expect(future, throwsA(HttpError.badRequest));
     });
 
-    test('Should throw Unauthorized if HttpAdapter returns 400', () async {
+    test('Should throw Unauthorized if HttpAdapter returns 401', () async {
       client.mockPost(401);
       final future = sut.request(url: url, method: 'post');
       expect(future, throwsA(HttpError.unauthorized));
-    });
-
-    test('Should throw NotFound if HttpAdapter returns 400', () async {
-      client.mockPost(404);
-      final future = sut.request(url: url, method: 'post');
-      expect(future, throwsA(HttpError.notFound));
     });
 
     test('Should throws ForbiddenError if HttpAdapter returns 403', () {
       client.mockPost(403);
       final future = sut.request(url: url, method: 'post');
       expect(future, throwsA(HttpError.forbidden));
+    });
+
+    test('Should throw NotFound if HttpAdapter returns 404', () async {
+      client.mockPost(404);
+      final future = sut.request(url: url, method: 'post');
+      expect(future, throwsA(HttpError.notFound));
     });
 
     test('Should throws ServerErrorError if HttpAdapter returns 500', () {
