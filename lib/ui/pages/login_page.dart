@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../ui/components/components.dart';
+
 class LoginPage extends StatelessWidget {
   const LoginPage({Key? key}) : super(key: key);
 
@@ -8,38 +10,46 @@ class LoginPage extends StatelessWidget {
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              color: Colors.black,
-              child: Image.asset('lib/ui/assets/logo.png'),
-            ),
-            Text('login'.toUpperCase()),
-            Form(
-                child: Column(
-              children: [
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    icon: Icon(Icons.email),
+            const LoginHeader(),
+            const Headline1(text: 'login'),
+            Padding(
+              padding: const EdgeInsets.all(32),
+              child: Form(
+                  child: Column(
+                children: [
+                  TextFormField(
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      icon: Icon(
+                        Icons.email,
+                        color: Theme.of(context).primaryColorLight,
+                      ),
+                    ),
                   ),
-                ),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Senha',
-                    icon: Icon(Icons.lock),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0, bottom: 32),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Senha',
+                        icon: Icon(Icons.lock,
+                            color: Theme.of(context).primaryColorLight),
+                      ),
+                    ),
                   ),
-                ),
-                ElevatedButton(
-                  onPressed: () {},
-                  child: Text('Entrar'.toUpperCase()),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.person),
-                  label: Text('Criar conta'.toUpperCase()),
-                )
-              ],
-            ))
+                  ElevatedButton(
+                    onPressed: () {},
+                    child: Text('Entrar'.toUpperCase()),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(Icons.person),
+                    label: Text('Criar conta'.toUpperCase()),
+                  )
+                ],
+              )),
+            )
           ],
         ),
       ),
