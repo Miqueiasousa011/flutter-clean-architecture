@@ -4,12 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fordev/ui/pages/pages.dart';
 
 void main() {
-  testWidgets('Should load with correct initial values',
-      (WidgetTester tester) async {
+  Future<void> loadPage(WidgetTester tester) async {
     const loginPage = MaterialApp(home: LoginPage());
-
     //manda renderizar a pagina de login
     await tester.pumpWidget(loginPage);
+  }
+
+  testWidgets('Should load with correct initial values',
+      (WidgetTester tester) async {
+    await loadPage(tester);
 
     //Encontrar todos os filhos do tipo text do campo de email
     final emailTextChildren = find.descendant(
