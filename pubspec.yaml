@@ -19,14 +19,25 @@ dev_dependencies:
   test: ^1.17.10
   mocktail: ^0.2.0
   faker: ^2.0.0
-
   flutter_lints: ^1.0.0
+  flutter_launcher_icons: ^0.9.2
 
 
 flutter:
   uses-material-design: true
   assets:
     - lib/ui/assets/
+   
+# flutter pub run flutter_launcher_icons:main -f 
+flutter_icons:
+  ios: true
+  android: true
+  image_path_android: lib/ui/assets/icons/android.png
+  image_path_ios: lib/ui/assets/icons/ios.png
+  adaptive_icon_background: lib/ui/assets/icons/background.png
+  adaptive_icon_foreground: lib/ui/assets/icons/foreground.png
+  
+
 
 
 
