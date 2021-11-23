@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../pages/pages.dart';
 
@@ -7,6 +8,8 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+
     const primaryColor = Color.fromRGBO(136, 14, 79, 1);
     const primaryColorDark = Color.fromRGBO(96, 0, 39, 1);
     const primaryColorLight = Color.fromRGBO(188, 71, 123, 1);
@@ -58,7 +61,17 @@ class App extends StatelessWidget {
               ),
             ),
             foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-            backgroundColor: MaterialStateProperty.all<Color>(primaryColor),
+            backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+              (Set<MaterialState> states) {
+                if (states.contains(MaterialState.pressed)) {
+                  return primaryColorLight;
+                }
+                if (states.contains(MaterialState.disabled)) {
+                  return primaryColorLight.withOpacity(.6);
+                }
+                return primaryColor; // Use the component's default.
+              },
+            ),
             overlayColor: MaterialStateProperty.all<Color>(primaryColorLight),
             padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
               const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
