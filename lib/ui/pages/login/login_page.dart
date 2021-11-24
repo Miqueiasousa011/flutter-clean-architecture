@@ -22,27 +22,38 @@ class LoginPage extends StatelessWidget {
               child: Form(
                   child: Column(
                 children: [
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      icon: Icon(
-                        Icons.email,
-                        color: Theme.of(context).primaryColorLight,
-                      ),
-                    ),
-                    onChanged: presenter?.validateEmail,
-                  ),
+                  StreamBuilder<String>(
+                      stream: presenter?.emailErrorStream,
+                      builder: (context, snapshot) {
+                        return TextFormField(
+                          decoration: InputDecoration(
+                            errorText: snapshot.data,
+                            labelText: 'Email',
+                            icon: Icon(
+                              Icons.email,
+                              color: Theme.of(context).primaryColorLight,
+                            ),
+                          ),
+                          onChanged: presenter?.validateEmail,
+                        );
+                      }),
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0, bottom: 32),
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        labelText: 'Senha',
-                        icon: Icon(Icons.lock,
-                            color: Theme.of(context).primaryColorLight),
-                      ),
-                      obscureText: true,
-                      onChanged: presenter?.validatePassword,
-                    ),
+                    child: StreamBuilder<Object>(
+                        stream: null,
+                        builder: (context, snapshot) {
+                          return TextFormField(
+                            decoration: InputDecoration(
+                              labelText: 'Senha',
+                              icon: Icon(
+                                Icons.lock,
+                                color: Theme.of(context).primaryColorLight,
+                              ),
+                            ),
+                            obscureText: true,
+                            onChanged: presenter?.validatePassword,
+                          );
+                        }),
                   ),
                   ElevatedButton(
                     onPressed: null,
