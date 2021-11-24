@@ -3,4 +3,5 @@ abstract class LoginPresenter {
   void validatePassword(String password);
 
   Stream<String?> get emailErrorStream;
+  Stream<String?> get passwordErrorStream;
 }

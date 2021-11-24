@@ -12,14 +12,20 @@ class LoginPresenterSpy extends Mock implements LoginPresenter {}
 void main() {
   late LoginPresenter presenter;
   late StreamController<String?> emailErrorController;
+  late StreamController<String?> passwordErroController;
 
   Future<void> loadPage(WidgetTester tester) async {
     presenter = LoginPresenterSpy();
     emailErrorController = StreamController<String?>();
 
+    passwordErroController = StreamController<String?>();
+
     when(() => presenter.emailErrorStream).thenAnswer(
       (_) => emailErrorController.stream,
     );
+
+    when(() => presenter.passwordErrorStream)
+        .thenAnswer((_) => passwordErroController.stream);
 
     final loginPage = MaterialApp(home: LoginPage(presenter: presenter));
     await tester.pumpWidget(loginPage);
@@ -27,6 +33,7 @@ void main() {
 
   tearDown(() {
     emailErrorController.close();
+    passwordErroController.close();
   });
 
   testWidgets('Should load with correct initial values',
@@ -74,7 +81,6 @@ void main() {
   testWidgets('Should call validade with password',
       (WidgetTester tester) async {
     await loadPage(tester);
-
     final password = Faker().internet.password();
     await tester.enterText(find.bySemanticsLabel('Senha'), password);
     verify(() => presenter.validatePassword(password));
@@ -83,7 +89,6 @@ void main() {
   testWidgets('Should present error if email is invalid',
       (WidgetTester tester) async {
     await loadPage(tester);
-
     emailErrorController.add('error');
     await tester.pump();
     expect(find.text('error'), findsOneWidget);
@@ -91,7 +96,6 @@ void main() {
 
   testWidgets('Should present valid email', (WidgetTester tester) async {
     await loadPage(tester);
-
     emailErrorController.add(null);
     await tester.pump();
 
@@ -106,13 +110,51 @@ void main() {
 
   testWidgets('Should present valid email', (WidgetTester tester) async {
     await loadPage(tester);
-
     emailErrorController.add('');
     await tester.pump();
 
     expect(
       find.descendant(
         of: find.bySemanticsLabel('Email'),
+        matching: find.byType(Text),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Should present error if password is invalid',
+      (WidgetTester tester) async {
+    await loadPage(tester);
+    passwordErroController.add('error');
+    await tester.pump();
+
+    expect(
+      find.text('error'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Should present valid password ', (WidgetTester tester) async {
+    await loadPage(tester);
+    passwordErroController.add(null);
+    await tester.pump();
+
+    expect(
+      find.descendant(
+        of: find.bySemanticsLabel('Senha'),
+        matching: find.byType(Text),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Should present valid password ', (WidgetTester tester) async {
+    await loadPage(tester);
+    passwordErroController.add('');
+    await tester.pump();
+    expect(
+      find.descendant(
+        of: find.bySemanticsLabel('Senha'),
         matching: find.byType(Text),
       ),
       findsOneWidget,
