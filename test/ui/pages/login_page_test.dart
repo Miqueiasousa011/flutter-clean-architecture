@@ -13,19 +13,21 @@ void main() {
   late LoginPresenter presenter;
   late StreamController<String?> emailErrorController;
   late StreamController<String?> passwordErroController;
+  late StreamController<bool> isFormValidController;
 
   Future<void> loadPage(WidgetTester tester) async {
     presenter = LoginPresenterSpy();
     emailErrorController = StreamController<String?>();
-
     passwordErroController = StreamController<String?>();
+    isFormValidController = StreamController<bool>();
 
     when(() => presenter.emailErrorStream).thenAnswer(
       (_) => emailErrorController.stream,
     );
-
     when(() => presenter.passwordErrorStream)
         .thenAnswer((_) => passwordErroController.stream);
+    when(() => presenter.isFormValid)
+        .thenAnswer((_) => isFormValidController.stream);
 
     final loginPage = MaterialApp(home: LoginPage(presenter: presenter));
     await tester.pumpWidget(loginPage);
@@ -34,6 +36,7 @@ void main() {
   tearDown(() {
     emailErrorController.close();
     passwordErroController.close();
+    isFormValidController.close();
   });
 
   testWidgets('Should load with correct initial values',
@@ -159,5 +162,23 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('Should enable button if form is valid',
+      (WidgetTester tester) async {
+    await loadPage(tester);
+    isFormValidController.add(true);
+    await tester.pump();
+    final button = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
+    expect(button.onPressed, isNotNull);
+  });
+
+  testWidgets('Should disabled button if invalid form',
+      (WidgetTester tester) async {
+    await loadPage(tester);
+    isFormValidController.add(false);
+    await tester.pump();
+    final button = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
+    expect(button.onPressed, null);
   });
 }

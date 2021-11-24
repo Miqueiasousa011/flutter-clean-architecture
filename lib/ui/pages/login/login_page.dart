@@ -60,10 +60,14 @@ class LoginPage extends StatelessWidget {
                           );
                         }),
                   ),
-                  ElevatedButton(
-                    onPressed: null,
-                    child: Text('Entrar'.toUpperCase()),
-                  ),
+                  StreamBuilder<bool>(
+                      stream: presenter?.isFormValid,
+                      builder: (context, snapshot) {
+                        return ElevatedButton(
+                          onPressed: snapshot.data == true ? () {} : null,
+                          child: Text('Entrar'.toUpperCase()),
+                        );
+                      }),
                   OutlinedButton.icon(
                     onPressed: () {},
                     icon: const Icon(Icons.person),
