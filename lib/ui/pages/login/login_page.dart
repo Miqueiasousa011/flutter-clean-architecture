@@ -22,12 +22,14 @@ class LoginPage extends StatelessWidget {
               child: Form(
                   child: Column(
                 children: [
-                  StreamBuilder<String>(
+                  StreamBuilder<String?>(
                       stream: presenter?.emailErrorStream,
                       builder: (context, snapshot) {
                         return TextFormField(
                           decoration: InputDecoration(
-                            errorText: snapshot.data,
+                            errorText: snapshot.data?.isEmpty == true
+                                ? null
+                                : snapshot.data,
                             labelText: 'Email',
                             icon: Icon(
                               Icons.email,
