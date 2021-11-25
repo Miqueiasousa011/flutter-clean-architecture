@@ -7,7 +7,12 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:fordev/ui/pages/pages.dart';
 
-class LoginPresenterSpy extends Mock implements LoginPresenter {}
+class LoginPresenterSpy extends Mock implements LoginPresenter {
+  LoginPresenterSpy() {
+    final stream = StreamController<String?>();
+    when(() => auth()).thenAnswer((_) async => stream.stream);
+  }
+}
 
 void main() {
   late LoginPresenter presenter;
@@ -17,14 +22,15 @@ void main() {
   late StreamController<bool> isLoadingController;
   late StreamController<String?> mainErrorController;
 
-  Future<void> loadPage(WidgetTester tester) async {
-    presenter = LoginPresenterSpy();
+  void initStreams() {
     emailErrorController = StreamController<String?>();
     passwordErroController = StreamController<String?>();
     isFormValidController = StreamController<bool>();
     isLoadingController = StreamController<bool>();
     mainErrorController = StreamController<String?>();
+  }
 
+  void mockStreams() {
     when(() => presenter.emailErrorStream).thenAnswer(
       (_) => emailErrorController.stream,
     );
@@ -38,17 +44,26 @@ void main() {
 
     when(() => presenter.mainErrorController)
         .thenAnswer((_) => mainErrorController.stream);
-
-    final loginPage = MaterialApp(home: LoginPage(presenter: presenter));
-    await tester.pumpWidget(loginPage);
   }
 
-  tearDown(() {
+  void closeStreams() {
     emailErrorController.close();
     passwordErroController.close();
     isFormValidController.close();
     isLoadingController.close();
     mainErrorController.close();
+  }
+
+  Future<void> loadPage(WidgetTester tester) async {
+    presenter = LoginPresenterSpy();
+    initStreams();
+    mockStreams();
+    final loginPage = MaterialApp(home: LoginPage(presenter: presenter));
+    await tester.pumpWidget(loginPage);
+  }
+
+  tearDown(() {
+    closeStreams();
   });
 
   testWidgets('Should load with correct initial values',
