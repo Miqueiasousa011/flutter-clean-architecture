@@ -11,75 +11,93 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const LoginHeader(),
-            const Headline1(text: 'login'),
-            Padding(
-              padding: const EdgeInsets.all(32),
-              child: Form(
-                  child: Column(
+      body: Builder(builder: (context) {
+        presenter?.isLoadingController.listen((bool isLoading) {
+          if (isLoading) {
+            showDialog(
+              barrierDismissible: false,
+              context: context,
+              builder: (context) => const SimpleDialog(
                 children: [
-                  StreamBuilder<String?>(
-                      stream: presenter?.emailErrorStream,
-                      builder: (context, snapshot) {
-                        return TextFormField(
-                          decoration: InputDecoration(
-                            errorText: snapshot.data?.isEmpty == true
-                                ? null
-                                : snapshot.data,
-                            labelText: 'Email',
-                            icon: Icon(
-                              Icons.email,
-                              color: Theme.of(context).primaryColorLight,
-                            ),
-                          ),
-                          onChanged: presenter?.validateEmail,
-                        );
-                      }),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0, bottom: 32),
-                    child: StreamBuilder<String?>(
-                        stream: presenter?.passwordErrorStream,
+                  CircularProgressIndicator(),
+                  SizedBox(height: 10),
+                  Text('loading...', textAlign: TextAlign.center),
+                ],
+              ),
+            );
+          } else {}
+        });
+
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const LoginHeader(),
+              const Headline1(text: 'login'),
+              Padding(
+                padding: const EdgeInsets.all(32),
+                child: Form(
+                    child: Column(
+                  children: [
+                    StreamBuilder<String?>(
+                        stream: presenter?.emailErrorStream,
                         builder: (context, snapshot) {
                           return TextFormField(
                             decoration: InputDecoration(
-                              labelText: 'Senha',
-                              icon: Icon(
-                                Icons.lock,
-                                color: Theme.of(context).primaryColorLight,
-                              ),
                               errorText: snapshot.data?.isEmpty == true
                                   ? null
                                   : snapshot.data,
+                              labelText: 'Email',
+                              icon: Icon(
+                                Icons.email,
+                                color: Theme.of(context).primaryColorLight,
+                              ),
                             ),
-                            obscureText: true,
-                            onChanged: presenter?.validatePassword,
+                            onChanged: presenter?.validateEmail,
                           );
                         }),
-                  ),
-                  StreamBuilder<bool>(
-                      stream: presenter?.isFormValid,
-                      builder: (context, snapshot) {
-                        return ElevatedButton(
-                          onPressed:
-                              snapshot.data == true ? presenter?.auth : null,
-                          child: Text('Entrar'.toUpperCase()),
-                        );
-                      }),
-                  OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.person),
-                    label: Text('Criar conta'.toUpperCase()),
-                  )
-                ],
-              )),
-            )
-          ],
-        ),
-      ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0, bottom: 32),
+                      child: StreamBuilder<String?>(
+                          stream: presenter?.passwordErrorStream,
+                          builder: (context, snapshot) {
+                            return TextFormField(
+                              decoration: InputDecoration(
+                                labelText: 'Senha',
+                                icon: Icon(
+                                  Icons.lock,
+                                  color: Theme.of(context).primaryColorLight,
+                                ),
+                                errorText: snapshot.data?.isEmpty == true
+                                    ? null
+                                    : snapshot.data,
+                              ),
+                              obscureText: true,
+                              onChanged: presenter?.validatePassword,
+                            );
+                          }),
+                    ),
+                    StreamBuilder<bool>(
+                        stream: presenter?.isFormValid,
+                        builder: (context, snapshot) {
+                          return ElevatedButton(
+                            onPressed:
+                                snapshot.data == true ? presenter?.auth : null,
+                            child: Text('Entrar'.toUpperCase()),
+                          );
+                        }),
+                    OutlinedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.person),
+                      label: Text('Criar conta'.toUpperCase()),
+                    )
+                  ],
+                )),
+              )
+            ],
+          ),
+        );
+      }),
     );
   }
 }

@@ -6,4 +6,5 @@ abstract class LoginPresenter {
   Stream<String?> get emailErrorStream;
   Stream<String?> get passwordErrorStream;
   Stream<bool> get isFormValid;
+  Stream<bool> get isLoadingController;
 }
