@@ -30,6 +30,13 @@ class LoginPage extends StatelessWidget {
           }
         });
 
+        presenter?.mainErrorController.listen((error) {
+          if (error != null) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(error)));
+          }
+        });
+
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
