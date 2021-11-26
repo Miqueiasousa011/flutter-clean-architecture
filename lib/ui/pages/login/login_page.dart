@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/components.dart';
-import './components/components.dart';
-
+import 'components/components.dart';
 import 'login_presenter.dart';
 
 class LoginPage extends StatefulWidget {
@@ -51,16 +50,7 @@ class _LoginPageState extends State<LoginPage> {
                         padding: EdgeInsets.only(top: 8.0, bottom: 32),
                         child: PasswordInput(),
                       ),
-                      StreamBuilder<bool>(
-                          stream: widget.presenter?.isFormValid,
-                          builder: (context, snapshot) {
-                            return ElevatedButton(
-                              onPressed: snapshot.data == true
-                                  ? widget.presenter?.auth
-                                  : null,
-                              child: Text('Entrar'.toUpperCase()),
-                            );
-                          }),
+                      const LoginButton(),
                       OutlinedButton.icon(
                         onPressed: () {},
                         icon: const Icon(Icons.person),
