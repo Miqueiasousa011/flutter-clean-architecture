@@ -1,0 +1,110 @@
+import 'package:faker/faker.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+
+import 'package:fordev/presentation/protocols/protocols.dart';
+import 'package:fordev/presentation/presenters/presenters.dart';
+
+class ValidationSpy extends Mock implements Validation {
+  ValidationSpy() {
+    when(() => validate(field: any(named: 'field'), value: any(named: 'value')))
+        .thenReturn(null);
+  }
+}
+
+void main() {
+  late StreamLoginPresenter sut;
+  late Validation validation;
+  late String email;
+  late String password;
+
+  setUp(() {
+    validation = ValidationSpy();
+    sut = StreamLoginPresenter(validation);
+    password = Faker().internet.password();
+    email = Faker().internet.email();
+  });
+
+  test('Should call validation with correct email', () {
+    sut.validateEmail(email);
+
+    verify(() => validation.validate(field: 'email', value: email)).called(1);
+  });
+
+  test('Should emit email error if validation fails', () {
+    when(() => validation.validate(
+        field: any(named: 'field'),
+        value: any(named: 'value'))).thenReturn('error');
+
+    sut.emailErrorStream
+        .listen(expectAsync1((error) => expect(error, equals('error'))));
+    sut.isFormValidStream
+        .listen(expectAsync1((error) => expect(error, equals(false))));
+
+    sut.validateEmail(email);
+    sut.validateEmail(email);
+  });
+
+  test('Should emit null if validate ', () {
+    when(() => validation.validate(field: 'email', value: any(named: 'value')))
+        .thenReturn(null);
+
+    sut.emailErrorStream
+        .listen(expectAsync1((error) => expect(error, equals(null))));
+    sut.isFormValidStream
+        .listen(expectAsync1((valide) => expect(valide, equals(false))));
+
+    sut.validateEmail(email);
+    sut.validateEmail(email);
+  });
+
+  test('should call validation with correct password', () {
+    sut.validatePassword(password);
+
+    verify(() => validation.validate(field: 'password', value: password));
+  });
+
+  test('Should emit passwordError if validation fails', () {
+    when(() =>
+            validation.validate(field: 'password', value: any(named: 'value')))
+        .thenReturn('error');
+
+    sut.passwordErrorStream
+        .listen(expectAsync1((error) => expect(error, equals('error'))));
+    sut.isFormValidStream
+        .listen(expectAsync1((valide) => expect(valide, equals(false))));
+
+    sut.validatePassword(password);
+    sut.validatePassword(password);
+  });
+
+  test('Should emit null if password validate', () {
+    when(() =>
+            validation.validate(field: 'password', value: any(named: 'value')))
+        .thenReturn(null);
+
+    sut.passwordErrorStream
+        .listen(expectAsync1((error) => expect(error, equals(null))));
+    sut.isFormValidStream
+        .listen(expectAsync1((valide) => expect(valide, equals(false))));
+
+    sut.validatePassword(password);
+    sut.validatePassword(password);
+  });
+
+  test('Should emit password error', () async {
+    sut.emailErrorStream
+        .listen(expectAsync1((error) => expect(error, equals(null))));
+
+    sut.passwordErrorStream
+        .listen(expectAsync1((error) => expect(error, equals(null))));
+
+    //Ao preencher primeiro o campo de email o formulário está inválido.
+    //Ao preencher o campo password, o formulário está válido.
+    expectLater(sut.isFormValidStream, emitsInOrder([false, true]));
+
+    sut.validateEmail(email);
+    await Future.delayed(const Duration(seconds: 0));
+    sut.validatePassword(password);
+  });
+}
