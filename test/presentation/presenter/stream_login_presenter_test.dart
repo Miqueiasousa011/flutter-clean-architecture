@@ -130,9 +130,18 @@ void main() {
     sut.validateEmail(email);
     sut.validatePassword(password);
 
-    sut.auth();
+    await sut.auth();
 
     verify(() => authentication
         .auth(AuthenticationParams(email: email, password: password)));
+  });
+
+  test("Should emit correct events on Authentication success", () async {
+    sut.validateEmail(email);
+    sut.validatePassword(password);
+
+    expectLater(sut.isLoadingStream, emitsInOrder([true, false]));
+
+    await sut.auth();
   });
 }
