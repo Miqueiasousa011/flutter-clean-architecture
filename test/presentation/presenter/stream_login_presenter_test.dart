@@ -1,6 +1,9 @@
 import 'package:faker/faker.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fordev/domain/entities/account_entity.dart';
 import 'package:mocktail/mocktail.dart';
+
+import 'package:fordev/domain/usecases/authentication.dart';
 
 import 'package:fordev/presentation/protocols/protocols.dart';
 import 'package:fordev/presentation/presenters/presenters.dart';
@@ -12,15 +15,30 @@ class ValidationSpy extends Mock implements Validation {
   }
 }
 
+class AuthenticationSpy extends Mock implements Authentication {
+  AuthenticationSpy() {
+    when(() => auth(any())).thenAnswer(
+        (_) async => AccountEntity(Faker().guid.guid(), Faker().person.name()));
+  }
+}
+
 void main() {
   late StreamLoginPresenter sut;
+  late Authentication authentication;
   late Validation validation;
   late String email;
   late String password;
 
+  setUpAll(() {
+    registerFallbackValue(AuthenticationParams(
+        email: Faker().internet.email(),
+        password: Faker().internet.password()));
+  });
+
   setUp(() {
+    authentication = AuthenticationSpy();
     validation = ValidationSpy();
-    sut = StreamLoginPresenter(validation);
+    sut = StreamLoginPresenter(validation, authentication);
     password = Faker().internet.password();
     email = Faker().internet.email();
   });
@@ -106,5 +124,15 @@ void main() {
     sut.validateEmail(email);
     await Future.delayed(const Duration(seconds: 0));
     sut.validatePassword(password);
+  });
+
+  test("Should call Authentication with correct params", () async {
+    sut.validateEmail(email);
+    sut.validatePassword(password);
+
+    sut.auth();
+
+    verify(() => authentication
+        .auth(AuthenticationParams(email: email, password: password)));
   });
 }
