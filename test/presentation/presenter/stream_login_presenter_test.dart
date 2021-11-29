@@ -1,9 +1,10 @@
 import 'package:faker/faker.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fordev/domain/entities/account_entity.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:fordev/domain/usecases/authentication.dart';
+import 'package:fordev/domain/usecases/usecases.dart';
+import 'package:fordev/domain/entities/entities.dart';
+import 'package:fordev/domain/helpers/helpers.dart';
 
 import 'package:fordev/presentation/protocols/protocols.dart';
 import 'package:fordev/presentation/presenters/presenters.dart';
@@ -141,6 +142,21 @@ void main() {
     sut.validatePassword(password);
 
     expectLater(sut.isLoadingStream, emitsInOrder([true, false]));
+
+    await sut.auth();
+  });
+
+  test("Should emit correct events on InvalidCredentialsError", () async {
+    when(() => authentication.auth(any()))
+        .thenThrow(DomainError.invalidCredentials);
+
+    sut.validateEmail(email);
+    sut.validatePassword(password);
+
+    expectLater(sut.isLoadingStream, emits(false));
+
+    sut.mainErrorStream.listen(expectAsync1(
+        (error) => expect(error, equals('Credenciais inválidas'))));
 
     await sut.auth();
   });
