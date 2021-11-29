@@ -56,9 +56,9 @@ void main() {
         value: any(named: 'value'))).thenReturn('error');
 
     sut.emailErrorStream
-        .listen(expectAsync1((error) => expect(error, equals('error'))));
+        ?.listen(expectAsync1((error) => expect(error, equals('error'))));
     sut.isFormValidStream
-        .listen(expectAsync1((error) => expect(error, equals(false))));
+        ?.listen(expectAsync1((error) => expect(error, equals(false))));
 
     sut.validateEmail(email);
     sut.validateEmail(email);
@@ -69,9 +69,9 @@ void main() {
         .thenReturn(null);
 
     sut.emailErrorStream
-        .listen(expectAsync1((error) => expect(error, equals(null))));
+        ?.listen(expectAsync1((error) => expect(error, equals(null))));
     sut.isFormValidStream
-        .listen(expectAsync1((valide) => expect(valide, equals(false))));
+        ?.listen(expectAsync1((valide) => expect(valide, equals(false))));
 
     sut.validateEmail(email);
     sut.validateEmail(email);
@@ -89,9 +89,9 @@ void main() {
         .thenReturn('error');
 
     sut.passwordErrorStream
-        .listen(expectAsync1((error) => expect(error, equals('error'))));
+        ?.listen(expectAsync1((error) => expect(error, equals('error'))));
     sut.isFormValidStream
-        .listen(expectAsync1((valide) => expect(valide, equals(false))));
+        ?.listen(expectAsync1((valide) => expect(valide, equals(false))));
 
     sut.validatePassword(password);
     sut.validatePassword(password);
@@ -103,9 +103,9 @@ void main() {
         .thenReturn(null);
 
     sut.passwordErrorStream
-        .listen(expectAsync1((error) => expect(error, equals(null))));
+        ?.listen(expectAsync1((error) => expect(error, equals(null))));
     sut.isFormValidStream
-        .listen(expectAsync1((valide) => expect(valide, equals(false))));
+        ?.listen(expectAsync1((valide) => expect(valide, equals(false))));
 
     sut.validatePassword(password);
     sut.validatePassword(password);
@@ -113,10 +113,10 @@ void main() {
 
   test('Should emit password error', () async {
     sut.emailErrorStream
-        .listen(expectAsync1((error) => expect(error, equals(null))));
+        ?.listen(expectAsync1((error) => expect(error, equals(null))));
 
     sut.passwordErrorStream
-        .listen(expectAsync1((error) => expect(error, equals(null))));
+        ?.listen(expectAsync1((error) => expect(error, equals(null))));
 
     //Ao preencher primeiro o campo de email o formulário está inválido.
     //Ao preencher o campo password, o formulário está válido.
@@ -155,7 +155,7 @@ void main() {
 
     expectLater(sut.isLoadingStream, emits(false));
 
-    sut.mainErrorStream.listen(expectAsync1(
+    sut.mainErrorStream?.listen(expectAsync1(
         (error) => expect(error, equals('Credenciais inválidas.'))));
 
     await sut.auth();
@@ -169,9 +169,17 @@ void main() {
 
     expectLater(sut.isLoadingStream, emits(false));
 
-    sut.mainErrorStream.listen(expectAsync1((error) =>
+    sut.mainErrorStream?.listen(expectAsync1((error) =>
         expect(error, 'Algo Errado aconteceu. Tente novamente em breve.')));
 
     await sut.auth();
+  });
+
+  test("Should not emit after dispose", () async {
+    expectLater(sut.emailErrorStream, neverEmits(null));
+
+    await sut.dispose();
+
+    sut.validateEmail(email);
   });
 }
