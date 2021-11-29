@@ -25,10 +25,10 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Builder(builder: (context) {
-        widget.presenter?.isLoadingController.listen((bool isLoading) =>
+        widget.presenter?.isLoadingStream?.listen((bool isLoading) =>
             isLoading ? showLoading(context) : hideLoading(context));
 
-        widget.presenter?.mainErrorController.listen((error) {
+        widget.presenter?.mainErrorStream?.listen((error) {
           if (error != null) showErrorMessage(context, error);
         });
 
