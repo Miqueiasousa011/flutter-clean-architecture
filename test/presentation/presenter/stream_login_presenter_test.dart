@@ -156,7 +156,21 @@ void main() {
     expectLater(sut.isLoadingStream, emits(false));
 
     sut.mainErrorStream.listen(expectAsync1(
-        (error) => expect(error, equals('Credenciais inválidas'))));
+        (error) => expect(error, equals('Credenciais inválidas.'))));
+
+    await sut.auth();
+  });
+
+  test("Should emit correct events on UnexpectedError", () async {
+    when(() => authentication.auth(any())).thenThrow(DomainError.unexpected);
+
+    sut.validateEmail(email);
+    sut.validatePassword(password);
+
+    expectLater(sut.isLoadingStream, emits(false));
+
+    sut.mainErrorStream.listen(expectAsync1((error) =>
+        expect(error, 'Algo Errado aconteceu. Tente novamente em breve.')));
 
     await sut.auth();
   });
